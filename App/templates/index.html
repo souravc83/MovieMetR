@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container">
+	
+<div class="row">
+	<div class="col-md-4">
+        <form class="navbar-form navbar-left" role="form" method="POST">
+            <div class="input-group">
+                <input type="text" name="zipcode" class="form-control" placeholder="Your Zipcode">
+                        <button type="submit" class="btn btn-success">Submit</button>
+            </div><!-- /input-group -->
+        </form>
+	</div><!-- /.col-lg-6 -->
+
+
+<!-- Single button -->
+	<div class="dropdown">
+			<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+				Choose your Genre <span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu" role="menu">
+				<li><a href="#">Horror</a></li>
+				<li><a href="#">Comedy</a></li>
+				<li><a href="#">Drama</a></li>
+			</ul>
+	</div>
+</div>
+<p> Showing results for {{location}}</p>
+
+
+<div class="col-md-8 col-md-offset-1">
+    
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Number</th>
+                    <th>Movie</th>
+                    <th>Theater</th>
+                    <th>Rating</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for movie in moviedict %}
+                <tr>
+                    <td>1.</td>
+                    <td>{{movie}}</td>
+                    <td>{{moviedict[movie]}}</td>
+                    <td>0.9</td>
+                    
+                </tr>
+                
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+</div>
+
+</div>
+{% endblock %}

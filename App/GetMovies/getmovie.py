@@ -1,0 +1,37 @@
+from msnmovie import MSNmovie
+
+class GetMovie(object):
+    """
+    returns all the movies running in the theater now
+    at a given location
+    """
+
+    def __init__(self):
+        #self._zipcode=zipcode;
+        self._localmovies=MSNmovie();
+        self._moviedict=None;
+        
+
+    def _list_to_str(self, theaterlist):
+        theaters=theaterlist[0]
+
+        for i in range(1,len(theaterlist)):
+            theaters=theaters+','+theaterlist[i]
+            
+        return theaters
+        
+    def toptenmovies(self):
+        self._moviedict=self._localmovies.getmovielist()
+
+        counter=0;
+        topten={}
+        for movie in self._moviedict:
+            if counter ==10:
+                break
+            topten[movie]=self._list_to_str(self._moviedict[movie])
+            counter+=1
+             
+        return topten
+        
+        
+        
