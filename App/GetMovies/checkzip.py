@@ -14,7 +14,7 @@ import sqlite3
 class CheckZip(object):
 
     def __init__(self,zipcode):
-        self._zipcode=zipcode #should this be int(zipcode)
+        self._zipcode=int(zipcode) 
         self._iserror=False
         self._database_name='us_zipcodes.db'
         #to be defined later
@@ -49,7 +49,7 @@ class CheckZip(object):
             self._iserror=True
             return None
         else:
-            city,state=loc_data
+            city,state=loc_data[0]
             placestr=city+", "+state
             return placestr
        
@@ -60,10 +60,11 @@ class CheckZip(object):
 
         if location is not None:
             locstr=location+" "+str(self._zipcode)
-        else
+        else:
             locstr="Pittsburgh, PA"+" " +str(15232)
 
         return locstr,self._iserror
-                
+
+
         
    

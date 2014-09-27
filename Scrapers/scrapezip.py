@@ -37,6 +37,8 @@ class ZipDir(object):
             self._eachstate(statelink,state_abbr)
             print "Completed: ",state_abbr
             #break
+        self._con.commit()
+        self._con.close()
         return
     
     def _eachstate(self,statelink,state_abbr):
@@ -65,6 +67,7 @@ class ZipDir(object):
     def _init_database(self):
         self._con=sqlite3.connect(self._database_name)
         self._cursor=self._con.cursor()
+        self._cursor.execute('DROP TABLE IF EXISTS uszipcodes')
         self._cursor.execute('CREATE TABLE uszipcodes(\
                                            zipcode INT PRIMARY KEY NOT NULL,\
                                            city VARCHAR(255) NOT NULL,\

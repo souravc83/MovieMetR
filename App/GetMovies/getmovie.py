@@ -6,9 +6,9 @@ class GetMovie(object):
     at a given location
     """
 
-    def __init__(self):
-        #self._zipcode=zipcode;
-        self._localmovies=MSNmovie();
+    def __init__(self,zipcode=None):
+        self._zipcode=zipcode;
+        self._localmovies=MSNmovie(zipcode=self._zipcode);
         self._moviedict=None;
         
 

@@ -22,8 +22,11 @@ def index():
 def index_zipcode():
     zipcode=request.form["zipcode"]
     is_zip_valid=CheckZip(zipcode)
-    location,error=check_zipcode.get_location()
-    movies=GetMovie()
+    location,error=is_zip_valid.get_location()
+    int_zip=15232#default
+    if error==False:
+        int_zip=int(zipcode)
+    movies=GetMovie(int_zip)
     moviedict=movies.toptenmovies()
     return render_template('index.html',moviedict=moviedict,location=location)
     
