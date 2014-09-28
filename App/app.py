@@ -13,8 +13,8 @@ app = Flask(__name__)
 @app.route('/index.html')
 def index():
     movies=GetMovie()
-    moviedict=movies.toptenmovies()
-    return render_template('index.html',moviedict=moviedict,zipcode=15232)
+    movielist=movies.toptenmovies()
+    return render_template('index.html',movielist=movielist,zipcode=15232)
 
 
 @app.route('/',methods=['POST'])
@@ -27,8 +27,8 @@ def index_zipcode():
     if error==False:
         int_zip=int(zipcode)
     movies=GetMovie(int_zip)
-    moviedict=movies.toptenmovies()
-    return render_template('index.html',moviedict=moviedict,location=location)
+    movielist=movies.toptenmovies()
+    return render_template('index.html',movielist=movielist,location=location)
     
     
 

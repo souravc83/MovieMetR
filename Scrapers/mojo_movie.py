@@ -23,7 +23,7 @@ class MojoMovie(object):
     def __init__(self,moviejson):
         self._baseurl='http://www.boxofficemojo.com'
         self._jsonfile=moviejson
-        self._dictlist_picklefile='dictlist.pickle'
+        self._dictlist_picklefile='dictlist_movies_2014.pickle'
         #to be defined later
         self._ordered_movie_dict=None;
 

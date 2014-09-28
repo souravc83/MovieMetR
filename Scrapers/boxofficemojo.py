@@ -59,7 +59,7 @@ class MovieWeekend(object):
         return
 
     def scrapemain(self):
-        for i in range(1,53):
+        for i in range(1,39):
             try:
                 self._scrapeweekend(i);
                 time.sleep(5)
@@ -75,9 +75,9 @@ class MovieWeekend(object):
 
 
 def main():
-    mojo=MovieWeekend(2013)
+    mojo=MovieWeekend(2014)
     mojo.scrapemain()
-    mojo.savejson('movies2013.json')
+    mojo.savejson('movies2014.json')
 
 if __name__ == "__main__":
     main()
