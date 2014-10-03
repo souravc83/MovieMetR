@@ -25,7 +25,16 @@ class MovieTrainer(object):
         self._labels=None
         self._clf=None
         
+        self._training_frame=None
+        self._test_frame=None
         self._prediction_frame=None
+        
+        #dicts
+        self._actor_dict=None
+        self._director_dict=None
+        self._genre_dict=None
+        self._production_house=None
+        
     
     def _load_dataframe(self):
         if os.path.isfile(self._training_pickle) ==True:
@@ -49,12 +58,13 @@ class MovieTrainer(object):
         return
             #raise error?
     
-    def _extract_features(self,frame):
+    def _extract_features(self,frame,istraining=True):
         """
         extracts features from training and test frame
         all major data munging, cleaning takes place here
         
         """ 
+        
         #check if labels exist for these movies      
         bool_series=pd.notnull(frame["domestic_gross"])
         
@@ -112,9 +122,21 @@ class MovieTrainer(object):
         plots and prints various kinds of stuff to test out the data
         change, comment and uncomment here directly
         """
-        #print self._training_frame.ix[105:110]
+        if self._training_frame is None:
+            self._load_dataframe()
+        
+        #print self._training_frame.ix[5:10]
+        #print len(self._training_frame.index)
         #only_budget=self._training_frame[pd.isnull(self._training_frame["domestic_gross"])]
         #print len(only_budget.index)
+        
+        #actors_there=self._training_frame[pd.notnull(self._training_frame["actors"])]
+        #print len(actors_there.index)
+        #print actors_there.head()
+        
+        #director_there=self._training_frame[pd.notnull(self._training_frame["director"])]
+        #print len(director_there.index)
+        #print director_there.head()
         pass
         
     def train_2013(self):
@@ -172,5 +194,15 @@ class MovieTrainer(object):
         
         con.commit()
         con.close()
+
+
+#running_time
+#genre (one-hot)
+#MPAA rating (one hot)
+#actors
+#production house (one hot)
+
+
+
         
         

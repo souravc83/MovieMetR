@@ -39,7 +39,8 @@ class GetMovie(object):
         
         for index in prediction_sorted.index:
             [name,theaters,pred]=prediction_sorted.ix[index]
-            topten.append([counter+1,name,theaters,pred])
+            pred_percent=pred*100
+            topten.append([counter+1,name,theaters,pred,pred_percent])
             counter+=1
             if counter==10:
                 break
@@ -82,8 +83,7 @@ class GetMovie(object):
                                                             [movie,theaterstr,pred]
                 #print "Added: ",movie
            
-           
-           
+              
         
         
         

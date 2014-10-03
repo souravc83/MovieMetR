@@ -23,7 +23,7 @@ class MojoMovie(object):
     def __init__(self,moviejson):
         self._baseurl='http://www.boxofficemojo.com'
         self._jsonfile=moviejson
-        self._dictlist_picklefile='dictlist_movies_2014.pickle'
+        self._dictlist_picklefile='dictlist_movies_2013.pickle'
         #to be defined later
         self._ordered_movie_dict=None;
 
@@ -97,33 +97,40 @@ class MojoMovie(object):
 
         mp_boxes=soup_page.find_all("div",{"class":"mp_box"})
         
+        
+        
+        
         if len(mp_boxes)!=0:
+            
             for box in mp_boxes:
                 box_tab=box.find("div",{"class":"mp_box_tab"})
                 box_txt=box_tab.get_text().encode('utf-8')
+                box_txt=re.sub('\s','_',box_txt)
+                #print box_txt
             
-                if box_txt == "Total Lifetime Grosses":
+                if box_txt == "Total_Lifetime_Grosses":
                     try:
                         self._lifetime_gross(moviedict,box)
                     except:
                         pass
             
-            if box_txt=='The Players':
-                try:
-                    self._find_actors(moviedict,box)
-                except:
-                    pass
+                if box_txt=='The_Players':
+
+                    try:
+                        self._find_actors(moviedict,box)
+                    except:
+                        pass
             
-            if box_txt=="Domestic Summary":
-                try:
-                    self._domestic_summary(moviedict,box)
-                except:
-                    pass
-            if box_txt=="Genres":
-                try:
-                    self._get_genres(moviedict,box)
-                except:
-                    pass
+                if box_txt=="Domestic_Summary":
+                    try:
+                        self._domestic_summary(moviedict,box)
+                    except:
+                        pass
+                if box_txt=="Genres":
+                    try:
+                        self._get_genres(moviedict,box)
+                    except:
+                        pass
         
         #weekly chart
         try:
@@ -172,10 +179,12 @@ class MojoMovie(object):
         for i in range(len(data_text)):
             if data_text[i]=="Director:":
                 newdict["director"]=data_text[i+1]
+                #print "Director:",data_text[i+1]
             if data_text[i]=='Writer:':
                 newdict["writer"]=data_text[i+1]
                 
-            if data_text[i]=='Actors:':
+                
+            if data_text[i]=='Actors:' or data_text[i]=='Actor:':
                 #print data_text[i+1] #if we use this version,
                 #we need to seperate first names, last names
                 #otherwise list only major actors
@@ -183,6 +192,7 @@ class MojoMovie(object):
                 actor_list=all_data[i+1].find_all("a")
                 actor_list=[actor.get_text().encode('utf-8') for actor in actor_list]
                 newdict["actors"]=actor_list
+                #print "Actors:",actor_list
         return
                 
 
