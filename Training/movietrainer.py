@@ -58,6 +58,40 @@ class MovieTrainer(object):
         return
             #raise error?
     
+    
+    def _create_actordict(self,frame):
+        
+        actordict={}
+        
+        
+        for index in frame.index:
+            actorlist=frame.ix[index,"actors"]
+            
+            
+            if type(actorlist)!=float:
+                for actorname in actorlist:
+                    actorname=re.sub('\s','_',actorname)
+                    actorname=re.sub('\*','',actorname)
+                    #print actorname
+                    if actorname in actordict:
+                        actordict[actorname]+=1
+                    else:
+                        actordict[actorname]=1
+        
+        
+        
+        
+        counter=0
+        for key,value in sorted(actordict.items(),key=lambda x:x[1],reverse=True):
+            print key,value
+            counter+=1
+            if counter>30:
+                break
+        return
+    
+    def _create_actor_features(self,frame):
+        pass
+    
     def _extract_features(self,frame,istraining=True):
         """
         extracts features from training and test frame
@@ -65,8 +99,29 @@ class MovieTrainer(object):
         
         """ 
         
+        #we will make features as the training frame, add feature columns
+        #and then remove original columns
+        #then we don't have to worry about which movies we dropped
+        
+         
+        cols_to_remove=(frame.columns).tolist()
+        
+        #check if labels exist for these movies 
+        features=frame[pd.notnull(frame["domestic_gross"])]
+        #create actor features
+        #self._create_actor_features()
+        #create director features
+        #self._create_director_features()
+        #production house
+        #self._create
+        
+        
         #check if labels exist for these movies      
         bool_series=pd.notnull(frame["domestic_gross"])
+        
+        
+        
+        
         
         df_X=frame["theater_list"].values
         
@@ -125,7 +180,13 @@ class MovieTrainer(object):
         if self._training_frame is None:
             self._load_dataframe()
         
-        #print self._training_frame.ix[5:10]
+        self._create_actordict(self._training_frame)
+        #col_list=(self._training_frame.columns).tolist()
+        #col_list.remove('actors')
+        #print col_list
+        #self._training_frame.drop(col_list,axis=1,inplace=True)
+        
+        #print self._training_frame.ix[15:20]
         #print len(self._training_frame.index)
         #only_budget=self._training_frame[pd.isnull(self._training_frame["domestic_gross"])]
         #print len(only_budget.index)
