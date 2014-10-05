@@ -58,47 +58,171 @@ class MovieTrainer(object):
         return
             #raise error?
     
-    
-    def _create_actordict(self,frame):
+    def _addtodict(self,name,dict):
+        if name in dict:
+            dict[name]+=1
+        else:
+            dict[name]=1
+        return
         
-        actordict={}
+    def _modify_string(self,playername):
+        playername=re.sub('\s','_',playername)
+        playername=re.sub('\*','',playername)
+        return playername
+    
+    def _create_playerdict(self,frame,colname,num_features):
+        
+        playerdict={}
         
         
         for index in frame.index:
-            actorlist=frame.ix[index,"actors"]
+            playerlist=frame.ix[index,colname]
             
             
-            if type(actorlist)!=float:
-                for actorname in actorlist:
-                    actorname=re.sub('\s','_',actorname)
-                    actorname=re.sub('\*','',actorname)
-                    #print actorname
-                    if actorname in actordict:
-                        actordict[actorname]+=1
-                    else:
-                        actordict[actorname]=1
-        
+            if type(playerlist)!=float:
+                if colname=="actors":
+                    for playername in playerlist:
+                        playername=self._modify_string(playername)
+                        self._addtodict(playername,playerdict)
+
+                else:
+                    playerlist=self._modify_string(playerlist)
+                    self._addtodict(playerlist,playerdict)   
         
         
         
         counter=0
-        for key,value in sorted(actordict.items(),key=lambda x:x[1],reverse=True):
-            print key,value
+        feature_list=[]
+        for key,value in sorted(playerdict.items(),key=lambda x:x[1],reverse=True):
+            #print key,value
+            feature_list.append(key)
             counter+=1
-            if counter>30:
+            if counter>num_features:
                 break
+        return feature_list
+    
+    def _create_player_features(self,frame,colname,num_features):
+        feature_list=self._create_playerdict(frame,colname,num_features)
+        
+        for player in feature_list:
+            feature_name=colname+":"+player
+            frame[feature_name]=pd.Series(0,index=frame.index)
+            bigplayer_name="feature:big_"+colname
+            frame[bigplayer_name]=pd.Series(0,index=frame.index)#big actors directors present or not?
+            
+        for index in frame.index:
+            playerval=frame.ix[index,colname]
+            if type(playerval)!=float: #playerval is not None
+                if colname=="actors":
+                    for actor in playerval:
+                        actor=self._modify_string(actor)
+                        if actor in feature_list:
+                            thisfeature=colname+":"+actor
+                            frame.loc[index,thisfeature]=1
+                else:
+                    playerval=self._modify_string(playerval)
+                    if playerval in feature_list:
+                        thisfeature=colname+":"+playerval
+                        frame.loc[index,thisfeature]=1
+                frame.loc[index,bigplayer_name]=1
+            else:
+                frame.loc[index,bigplayer_name]=0
+                        
+        return 
+                        
+                
+        
+    def _create_theater_features(self,frame):
+        
+        #add feature column
+        frame["feature:num_theaters"]=pd.Series(0,index=frame.index)
+        
+        
+        for index in frame.index:
+            theater_list=frame.ix[index,"theater_list"]
+            if type(theater_list)==list and len(theater_list)>0:
+                theater=theater_list[0]
+                theater=re.sub(',','',theater)
+                if re.search('\d+',theater) is not None:
+                    frame.loc[index,"feature:num_theaters"]=int(theater)
+                else:
+                    frame.loc[index,"feature:num_theaters"]=0
+            else:
+                frame.loc[index,"feature:num_theaters"]=0
+        
+        return
+        
+    def _first_weekend_rank(self,frame):
+        #todo: try to merge with create theater features
+        frame["feature:rank"]=pd.Series(0,index=frame.index)
+        for index in frame.index:
+            rank_list=frame.ix[index,"rank_list"]
+            if type(rank_list)==list and len(rank_list)>0:
+                rank=rank_list[0]
+                rank=re.sub(',','',rank)
+                if re.search('\d+',rank) is not None:
+                    frame.loc[index,"feature:rank"]=int(rank)
+                else:
+                    frame.loc[index,"feature:rank"]=1000#some large number? or zero?
+            else:
+                frame.loc[index,"feature:rank"]=1000
+        
         return
     
-    def _create_actor_features(self,frame):
-        pass
+    def _create_running_time_feature(self,frame):
+        frame["feature:runtime"]=pd.Series(0,index=frame.index)
+        
+        for index in frame.index:
+            running_time=frame.ix[index,"runtime"]
+            if type(running_time)!= float: #not NaN
+                pattern='(\d+).+\s(\d+)'
+                hrmin=re.match(pattern,running_time)
+                if hrmin is not None:
+                    hrs=hrmin.group(1)
+                    mins=hrmin.group(2)
+                    tot_time=int(hrs)*60+int(mins)
+                    frame.loc[index,"feature:runtime"]=tot_time
+                    
+                else:
+                    frame.loc[index,"feature:runtime"]=0
+                    
+            else:
+                frame.loc[index,"feature:runtime"]=0
+            
+        return
+                
     
-    def _extract_features(self,frame,istraining=True):
+    def _create_release_date_feature(self,frame):
+        monthlist=["January","February","March","April","May","June"\
+                "July","August","September","October","November","December"]
+        
+        for month in monthlist:
+            feature_name="feature:release_"+month
+            frame[feature_name]=pd.Series(0,index=frame.index) 
+        
+        for index in frame.index:
+            release_date=frame.ix[index,"release_date"]
+            if type(release_date)!=float:
+                pattern='(\S+)\s(\d+)'
+                monthday=re.match(pattern,release_date)
+                if monthday is not None:
+                    month=monthday.group(1)
+                    day=monthday.group(2)
+                    
+                    if month in monthlist:
+                        thisfeature="feature:release_"+month
+                        frame.loc[index,thisfeature]=1
+        return
+                        
+                       
+    
+    def _extract_features(self,frame,isTraining=True):
         """
         extracts features from training and test frame
         all major data munging, cleaning takes place here
         
         """ 
-        
+        pass
         #we will make features as the training frame, add feature columns
         #and then remove original columns
         #then we don't have to worry about which movies we dropped
@@ -108,46 +232,52 @@ class MovieTrainer(object):
         
         #check if labels exist for these movies 
         features=frame[pd.notnull(frame["domestic_gross"])]
-        #create actor features
-        #self._create_actor_features()
-        #create director features
-        #self._create_director_features()
-        #production house
-        #self._create
+        
+        #no of theaters it opened at in the first week
+        #keep this as first feature so that you can plot using this
+        self._create_theater_features(features)
+        print "Created Theater Feature..."
+        #self._first_weekend_rank(features)
+        print "Created Rank Feature..."
+        #self._create_running_time_feature(features)
+        print "Created running time Feature..."
+        self._create_release_date_feature(features)
+        print "Created release date Feature..."
+        #create player features
+        self._create_player_features(features,"actors",20)
+        #self._create_player_features(features,"director",20)
+        #self._create_player_features(features,"distributor",20)
+        #self._create_player_features(features,"genre_toplist",5)
+        #self._create_player_features(features,"mpaa_rating",5)
+        print "Created player Features..."
         
         
-        #check if labels exist for these movies      
-        bool_series=pd.notnull(frame["domestic_gross"])
+    
+
+        
+        
+        #get training labels
+        if isTraining == True:
+            labels_arr=self._extract_labels(features)
+        else:
+            prediction_frame=pd.DataFrame(features["moviename"])
+       
         
         
         
+        #remove all original cols
+        features.drop(cols_to_remove,axis=1,inplace=True)
+        n_samples=len(features.index)
+        n_features=len(features.columns)
         
+        feature_arr=features.values.reshape(n_samples,n_features)
         
-        df_X=frame["theater_list"].values
+        print "Created All Features....."
         
-        
-        
-        #print type(df_X1)
-        #print df_X1.head()
-        
-        theater_list=[]
-        for i in range(df_X.shape[0]):
-            if bool_series.ix[i]==True and type(df_X[i])==list and len(df_X[i])>0:
-                theater=df_X[i][0]
-                theater=re.sub(',','',theater)
-                if re.search('\d+',theater) is not None:
-                    theater_list.append(int(theater))
-                else:
-                    bool_series.ix[i]=False
-                #theater_list.append(len(df_X[i]))
-            else:
-                bool_series.ix[i]=False
-        
-        
-        n_samples=len(theater_list)
-        
-        theater_arr=np.array(theater_list).reshape(n_samples,1)
-        return theater_arr,bool_series
+        if isTraining is True:
+            return feature_arr,labels_arr
+        else:
+            return feature_arr,prediction_frame
 
         
         #plt.plot(theater_arr,self._clf.predict(theater_arr),'r-',linewidth=2)
@@ -155,9 +285,9 @@ class MovieTrainer(object):
         #plt.show()
         return
     
-    def _extract_labels(self,frame,bool_series):
+    def _extract_labels(self,frame):
         
-        df_Y=(frame[bool_series])["domestic_gross"].values
+        df_Y=frame["domestic_gross"].values
         gross_list=df_Y.tolist()
         for i in range(len(gross_list)):
             gross_list[i]=int(gross_list[i])
@@ -165,9 +295,9 @@ class MovieTrainer(object):
         max_gross=np.max(gross_list)
         #print max_gross
         gross_list=[x/max_gross for x in gross_list]
-        
         n_samples=len(gross_list)
         gross_arr=np.array(gross_list).reshape(n_samples,1)
+        
         return gross_arr
         
         
@@ -180,13 +310,12 @@ class MovieTrainer(object):
         if self._training_frame is None:
             self._load_dataframe()
         
-        self._create_actordict(self._training_frame)
-        #col_list=(self._training_frame.columns).tolist()
+        
         #col_list.remove('actors')
         #print col_list
         #self._training_frame.drop(col_list,axis=1,inplace=True)
         
-        #print self._training_frame.ix[15:20]
+        print self._training_frame.ix[500:510]
         #print len(self._training_frame.index)
         #only_budget=self._training_frame[pd.isnull(self._training_frame["domestic_gross"])]
         #print len(only_budget.index)
@@ -203,13 +332,17 @@ class MovieTrainer(object):
     def train_2013(self):
         #pass
         self._load_dataframe()
-        self._features,bool_series=self._extract_features(self._training_frame)
-        self._labels=self._extract_labels(self._training_frame,bool_series)
+        self._features,self._labels=self._extract_features(self._training_frame,isTraining=True)
+        
         self._clf=LinearRegression()
         self._clf.fit(self._features,self._labels)
+        print "Finished Training....."
         
-        plt.plot(self._features,self._labels,'bo')
-        plt.plot(self._features,self._clf.predict(self._features),'r-',linewidth=2)
+        r_sq=self._clf.score(self._features,self._labels)
+        print "R Square for training set: ",r_sq
+        
+        plt.plot(self._features[:,0],self._labels,'bo')
+        plt.plot(self._features[:,0],self._clf.predict(self._features),'ro',linewidth=2)
         plt.show()
         
     
@@ -217,17 +350,23 @@ class MovieTrainer(object):
         #check if already trained
         if self._clf is None:
             self.train_2013()
-        self._test_features,bool_series=self._extract_features(self._test_frame)
-        self._prediction_frame=(self._test_frame[bool_series])["moviename"]
-        self._prediction_frame=pd.DataFrame(self._prediction_frame)
         
-        self._prediction_frame["prediction"]=1.0
+        print "Generating Test Features..."
+        self._test_features,self._prediction_frame=self._extract_features(\
+                                           self._test_frame,isTraining=False)
         
+        self._prediction_frame["prediction"]=self._clf.predict(self._test_features)
+        print "Finished Testing..."
         
-        print type(self._test_features)
-        for i in range(len(self._prediction_frame.index)):
-            self._prediction_frame.ix[i,"prediction"]=\
-                            self._clf.predict(self._test_features[i])
+        #sanity check and normalize
+        self._prediction_frame["prediction"]=self._prediction_frame["prediction"].apply(\
+                                             lambda x: 0 if x<0 else x)
+        maxpred=self._prediction_frame["prediction"].max()
+        if maxpred>1:
+            self._prediction_frame["prediction"]=self._prediction_frame["prediction"].apply(\
+                                                 lambda x: x/maxpred)
+            
+        
         
         print self._prediction_frame.head()
         
@@ -258,10 +397,7 @@ class MovieTrainer(object):
 
 
 #running_time
-#genre (one-hot)
-#MPAA rating (one hot)
-#actors
-#production house (one hot)
+
 
 
 

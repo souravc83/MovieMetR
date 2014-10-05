@@ -1,6 +1,18 @@
 from bs4 import BeautifulSoup
 from urllib2 import urlopen
 
+"""
+this class was used to scrape movies 
+from movies.msn.com. Unfortunately,
+they changed their html code, hiding the
+zipcode, and it is not possible to scrape
+by inputting a zipcode anymore.
+Hence, we will not use this for the project
+
+
+"""
+
+
 
 class MSNmovie(object):
     def __init__(self,zipcode=None):

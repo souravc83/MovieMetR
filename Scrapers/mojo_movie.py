@@ -20,10 +20,10 @@ class MojoMovie(object):
     www.boxofficemojo.com
     """
 
-    def __init__(self,moviejson):
+    def __init__(self,moviejson,dictlist_picklefile='default_dict.pickle'):
         self._baseurl='http://www.boxofficemojo.com'
         self._jsonfile=moviejson
-        self._dictlist_picklefile='dictlist_movies_2013.pickle'
+        self._dictlist_picklefile=dictlist_picklefile
         #to be defined later
         self._ordered_movie_dict=None;
 
