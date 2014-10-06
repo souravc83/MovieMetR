@@ -33,18 +33,20 @@ class GetMovie(object):
         
         counter=0;
         topten=[]
-        self._matchmovies()
-        prediction_sorted=self._full_predicted_list.sort(columns=["prediction"],ascending=False)
-        #print prediction_sorted.head()
+        self._read_nowplaying()
         
-        for index in prediction_sorted.index:
-            [name,theaters,pred]=prediction_sorted.ix[index]
+        
+        for data in self._moviedata:
+            (name,thumbnail,pred)=data
+            name=name.encode('utf-8')
+            name=re.sub('_',' ',name)
+            thumbnail=thumbnail.encode('utf-8')
+            pred=round(pred,3)
             pred_percent=pred*100
-            topten.append([counter+1,name,theaters,pred,pred_percent])
+            topten.append([counter+1,name,thumbnail,pred,pred_percent])
             counter+=1
             if counter==10:
                 break
-            
         
         return topten
         
@@ -82,7 +84,24 @@ class GetMovie(object):
                 self._full_predicted_list.loc[len(self._full_predicted_list)+1]=\
                                                             [movie,theaterstr,pred]
                 #print "Added: ",movie
-           
+    
+    def _read_nowplaying(self):
+        nowplaying_con=sqlite3.connect('nowplaying.db')
+        nowplaying_cursor=nowplaying_con.cursor()
+        query1='SELECT \
+                moviename,\
+                thumbnail,\
+                prediction\
+                FROM nowplaying\
+                ORDER BY prediction DESC\
+                LIMIT 10 '
+        nowplaying_cursor.execute(query1)
+        self._moviedata=nowplaying_cursor.fetchall()
+        
+        #for data in self._moviedata:
+        #    print data
+            
+                
               
         
         
