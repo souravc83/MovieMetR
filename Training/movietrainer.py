@@ -260,7 +260,7 @@ class MovieTrainer(object):
         if isTraining == True:
             labels_arr=self._extract_labels(features)
         else:
-            prediction_frame=pd.DataFrame(features["moviename"])
+            prediction_frame=features[["moviename","genre_toplist"]]
        
         
         
@@ -315,7 +315,7 @@ class MovieTrainer(object):
         #print col_list
         #self._training_frame.drop(col_list,axis=1,inplace=True)
         
-        print self._training_frame.ix[500:510]
+        #print self._training_frame.ix[500:510]
         #print len(self._training_frame.index)
         #only_budget=self._training_frame[pd.isnull(self._training_frame["domestic_gross"])]
         #print len(only_budget.index)
@@ -328,7 +328,15 @@ class MovieTrainer(object):
         #print len(director_there.index)
         #print director_there.head()
         pass
+    
+    def top_5_genres(self):
+        if self._training_frame is None:
+            self._load_dataframe()
+        genre_list=self._create_playerdict(self._training_frame,"genre_toplist",5)
+        print genre_list
         
+    
+    
     def train_2013(self):
         #pass
         self._load_dataframe()
@@ -380,17 +388,19 @@ class MovieTrainer(object):
         cursor.execute('DROP TABLE IF EXISTS currentmovies')
         cursor.execute('CREATE TABLE currentmovies(\
                                      moviename VARCHAR(255) ,\
+                                     genre VARCHAR(255),\
                                      prediction INT)')
         
         for index in self._prediction_frame.index:
-            movname=self._prediction_frame.ix[index]["moviename"]
+            movname=self._prediction_frame.ix[index]["moviename"].encode('utf-8')
             pred=self._prediction_frame.ix[index]["prediction"]
+            genre=self._prediction_frame.ix[index]["genre_toplist"].encode('utf-8')
             if type(movname)==float and math.isnan(movname)==True:
                 continue
-            print movname,pred
+            print movname,genre,pred
             
             cursor.execute('INSERT INTO currentmovies\
-                             VALUES(?,?)',(movname.encode('utf-8'),pred))
+                             VALUES(?,?,?)',(movname,genre,pred))
         
         con.commit()
         con.close()

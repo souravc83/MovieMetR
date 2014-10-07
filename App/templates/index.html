@@ -4,32 +4,52 @@
 <div class="container">
 	
 <div class="row">
-	<div class="col-md-4">
-        <form class="navbar-form navbar-left" role="form" method="POST">
+    <div class="col-md-4">
+
+        <!-- Genre Selection -->
+        <div class="dropdown">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    Choose your Genre <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a href="/index.html">All</a></li>
+                    <li><a href="/docu.html">Documentary</a></li>
+                    <li><a href="/foreign.html">Foreign</a></li>
+                    <li><a href="/drama.html">Drama</a></li>
+                    <li><a href="/comedy.html">Comedy</a></li>
+                    <li><a href="/thriller.html">Thriller</a></li>
+                    
+                </ul>
+        </div>
+    </div>
+    
+    
+    <div class="col-md-4">
+        
+        <!-- Search a movie -->
+        <!--<form class="navbar-form navbar-left" role="form" method="POST"> -->
             <div class="input-group">
-                <input type="text" name="zipcode" class="form-control" placeholder="Your Zipcode">
-                        <button type="submit" class="btn btn-success">Submit</button>
+                <input type="text" class="form-control" placeholder="Search a movie">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button">Go!</button>
+                    </span>
             </div><!-- /input-group -->
-        </form>
-	</div><!-- /.col-lg-6 -->
+       <!-- </form>-->
+    </div><!-- /.col-md-8-->
+    
+
+    
+    
+    
+</div><!--row -->
+
+<!--how to do this properly? -->
+<p>     </p>
+<p>     </p>
 
 
-<!-- Single button -->
-	<div class="dropdown">
-			<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-				Choose your Genre <span class="caret"></span>
-			</button>
-			<ul class="dropdown-menu" role="menu">
-				<li><a href="/horror">Horror</a></li>
-				<li><a href="/comedy">Comedy</a></li>
-				<li><a href="/drama">Drama</a></li>
-			</ul>
-	</div>
-</div>
-<p> Showing results for {{location}}</p>
 
-
-<div class="col-md-9 col-md-offset-1">
+<div class="col-md-11 col-md-offset-1">
     
     <div class="table-responsive">
         <table class="table table-striped">
@@ -37,7 +57,7 @@
                 <tr>
                     <th>Number</th>
                     <th>Movie</th>
-                    <th>Theater</th>
+                    <th>Thumbnail</th>
                     <th>Rating</th>
                     <th>Hotness</th>
                     
@@ -47,7 +67,7 @@
                 {% for entry in movielist %}
                 <tr>
                     <td class="col-md-1">{{entry[0]}}</td>
-                    <td class="col-md-1">{{entry[1]}}</td>
+                    <td class="col-md-3">{{entry[1]}}</td>
                     <td class="col-md-2"><img src={{entry[2]}} alt="Movie Thumbnail" style="width:61px;height:91px"></td>
                     <td class="col-md-1">{{entry[3]}}</td>
                     <td class="col-md-4">

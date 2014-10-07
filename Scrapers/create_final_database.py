@@ -53,14 +53,14 @@ class FinalDB(object):
         
         predict_data=predict_cursor.fetchall()
         
-        predict_df=pd.DataFrame(predict_data,columns=["moviename","prediction"])
+        predict_df=pd.DataFrame(predict_data,columns=["moviename","genre","prediction"])
         predict_df["moviename"]=predict_df["moviename"].apply(lambda x:re.sub('\s','_',x))
         
         #match the dataframes
         #need better string matching function here
         self._matched_frame=pd.merge(rotten_df,predict_df,on="moviename",how="inner")
         #print matched_frame.head()
-        print len(self._matched_frame.index)
+        print "Movies matched=",len(self._matched_frame.index)
         
         #save as sql database
         nowplaying_con=sqlite3.connect(self._nowplaying_db)
