@@ -1,0 +1,154 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>D3 Test</title>
+        <script type="text/javascript" src="d3.v3.min.js"></script>
+        <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js"></script>
+        <script type="text/javascript" src="jquery.tipsy.js"></script>
+        <link href="tipsy.css" rel="stylesheet" type="text/css" />
+        <style type="text/css">
+            
+            .axis path,
+            .axis line {
+                fill: none;
+                stroke: black;
+                shape-rendering: crispEdges;
+            }
+        
+        .axis text {
+            font-family: sans-serif;
+            font-size: 11px;
+            }
+        
+        .axis_label text {
+            font-family: sans-serif;
+            font-size: 18px;
+            
+            }
+        
+        </style>
+        
+        <script type="text/javascript">
+            $(document).ready(function(){
+                              $("#listbutton").click(function(){
+                                                     $("#graph1").hide();
+                                                     //$("#list").show();
+                                                     
+                                                     });
+                              $("#graphbutton").click(function(){
+                                                      $("#graph1").show();
+                                                      //$("#list").hide();
+                                                      //console.log($("#graph1").hide())
+                                                      
+                                                      });
+                              });
+            </script>
+
+    </head>
+    <body>
+        <div style="width:800px;">
+            <button type="button" id="listbutton">List</button>
+            <button type="button" id="graphbutton">Graph</button>
+        </div>
+            
+        <div style="text-align:center;width:800px;display:none" id="graph1">
+        <script type="text/javascript">
+            var width=500;
+            var height=520;
+            
+            var padding=40;
+            var colors= d3.scale.category20()
+            
+            
+            var xscale=d3.scale.linear()
+                               .domain([0,30])
+                               .range([padding ,width-padding])
+            var yscale=d3.scale.linear()
+                               .domain([0,50])
+                               .range([height-padding ,padding])
+            
+            
+            var dataset=[[5,10,"one"],[10,20,"two"],[15,30,"three"],[20,40,"four"]];
+           
+            var svg=d3.select("div")
+                      .append("svg")
+                      .attr("width",width)
+                      .attr("height",height)
+                      .attr("class","center");
+                svg.selectAll("circle")
+                   .data(dataset)
+                   .enter()
+                   .append("circle")
+                   .attr("cx",function(d,index){return xscale(d[0])})
+                   .attr("cy",function(d,index){return yscale(d[1])})
+                   .attr("r",function(d,index){return d[0]})
+                   .attr("fill",function (d){return colors(d[0]-1)})
+                   .attr("fill-opacity",0.3)
+                   .text(function (d){return d[0]});
+                   
+            var xAxis = d3.svg.axis()
+                              .scale(xscale)
+                              .orient("bottom")
+                              .ticks(5);
+                              
+            var yAxis = d3.svg.axis()
+                              .scale(yscale)
+                              .orient("left")
+                              .ticks(5);
+            
+            
+                svg.append("g")
+                    .attr("class","axis")
+                    .attr("transform", "translate(10," + (height - padding) + ")")
+                    .call(xAxis);
+                
+                svg.append("g")
+                .attr("class","axis")
+                .attr("transform", "translate(" + (padding) + ",0)")
+                .call(yAxis);
+                
+                
+                svg.append("text")
+                .attr("class", "axis_label")
+                .attr("text-anchor", "middle")
+                .attr("font-family","Arial")
+                .attr("font-size",16)
+                .attr("fill","#B8B8B8")
+                .attr("x", (width)/2)
+                .attr("y", height - padding + 40)
+                .text("What RottenTomato members think")
+                
+                svg.append("text")
+                .attr("font-family","Arial")
+                .attr("font-size",16)
+                .attr("fill","#B8B8B8")
+                .attr("class", "axis_label")
+                .attr("text-anchor", "middle")
+                .attr("x", -height/2)
+                .attr("y", 10)
+                .attr("transform", "rotate(-90)")
+                .text(" What the Data thinks ")
+                
+                
+                    
+                    $('svg circle').tipsy({
+                                            gravity: 'w',
+                                            html: true,
+                                            title: function()
+                                            {
+                                          return this.__data__[2];
+                                            }
+                                          }
+                                        );
+
+            
+
+            
+        </script>
+        </div>
+        
+        <div style="text-align:center;width:800px;" id="list">
+            <p> this is list </p>
+        </div>
+    </body>
+</html>

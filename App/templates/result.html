@@ -1,0 +1,81 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="row">
+    <div class="col-md-4">
+        <!--empty div-->
+        
+    </div>
+    
+    
+    <div class="col-md-4">
+        <!-- Search a movie -->
+        <form method="POST" action="."  role="search">
+            <div class="input-group">
+                <input type="text" class="form-control" name="address" placeholder="Search a Movie">
+                    <span class="input-group-btn">
+                        <button type="submit" class="btn btn-default">Go!</button>
+                    </span>
+                    </div><!-- /input-group -->
+        </form>
+    </div><!-- /.col-md-8-->
+    
+    <div class="col-md-4">
+        <!--empty div-->
+    </div>
+    
+    
+</div><!--row -->
+
+
+ <br><br><br><br>
+
+{% if isSuccess==True %}
+
+<div class="container" style="width:1000px;height:400px;">
+    <div class="row">
+        <div class="col-md-4">
+            <img src={{movdict.detailed}} alt="Movie Poster" style="width:120px;height:200x">
+        </div>
+        <div class="col-md-4">
+            <table class="table">
+                <tr>
+                    <td> Name:</td>
+                    <td><a href={{movdict.movlink}}> {{movdict.name}}</a></td>
+                </tr>
+                <tr>
+                    <td>Actors:</td>
+                    <td>{{movdict.actors[0]}}<br>{{movdict.actors[1]}}<br>{{movdict.actors[2]}}
+                    
+                </tr>
+                <tr>
+                    <td> Our Prediction:</td>
+                        <td>
+                            <div class="progress">
+                            <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="{{movdict.prediction}}" aria-valuemin="0" aria-valuemax="100" style="width: {{movdict.prediction}}%; min-width:20px;">
+                            <span> {{movdict.prediction}}</span>
+                            </div>
+                        </div>
+                        </td>
+
+                </tr>
+                <tr>
+                    <td>Rotten Tomato Score:</td>
+                    <td>{{movdict.audience_score}}
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+                        
+    
+
+
+{% else %}
+    <div style="text-align:center;width:1000px;height:400px;">
+        <br><br><br><br>
+        <h2><small> No movie names matched your query. Search for a different term.</small> </h2>
+    </div>
+{% endif %}
+
+{% endblock %}

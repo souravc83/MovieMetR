@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container">
+
+<div class="row">
+    <div class="col-md-4">
+        
+        <!-- Genre Selection -->
+        <div class="dropdown">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                Choose your Genre <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li><a href="/index.html">All</a></li>
+                <li><a href="/docu.html">Documentary</a></li>
+                <li><a href="/foreign.html">Foreign</a></li>
+                <li><a href="/drama.html">Drama</a></li>
+                <li><a href="/comedy.html">Comedy</a></li>
+                <li><a href="/thriller.html">Thriller</a></li>
+                
+            </ul>
+        </div>
+    </div>
+    
+    
+    <div class="col-md-4">
+        <!-- Search a movie -->
+        <form method="POST" action="."  role="search">
+            <div class="input-group">
+                <input type="text" class="form-control" name="address" placeholder="Search a Movie">
+                    <span class="input-group-btn">
+                        <button type="submit" class="btn btn-default">Go!</button>
+                    </span>
+                    </div><!-- /input-group -->
+        </form>
+    </div><!-- /.col-md-8-->
+    
+    <div class="col-md-4">
+        <ul class="nav nav-pills col-md-offset-6">
+            <li class="active"><a href="/graph.html">The MovieGraph</a></li>
+        </ul>
+        
+    </div>
+    
+    
+</div><!--row -->
+
+{% block mainpage %}{% endblock %}
+
+</div>
+
+
+{% endblock %}
+
+
+

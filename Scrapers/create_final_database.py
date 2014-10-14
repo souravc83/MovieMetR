@@ -40,7 +40,7 @@ class FinalDB(object):
         
         rotten_data=rotten_cursor.fetchall()
         
-        rotten_df=pd.DataFrame(rotten_data,columns=["movieid","moviename","thumbnail","score"])
+        rotten_df=pd.DataFrame(rotten_data,columns=["movieid","moviename","thumbnail","score","detailed","movlink"])
         rotten_df["moviename"]=rotten_df["moviename"].apply(lambda x:re.sub('\s','_',x))
         
         #prediction frame
@@ -53,7 +53,7 @@ class FinalDB(object):
         
         predict_data=predict_cursor.fetchall()
         
-        predict_df=pd.DataFrame(predict_data,columns=["moviename","genre","prediction"])
+        predict_df=pd.DataFrame(predict_data,columns=["moviename","genre","prediction","actor1","actor2","actor3"])
         predict_df["moviename"]=predict_df["moviename"].apply(lambda x:re.sub('\s','_',x))
         
         #match the dataframes

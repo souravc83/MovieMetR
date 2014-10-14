@@ -260,7 +260,7 @@ class MovieTrainer(object):
         if isTraining == True:
             labels_arr=self._extract_labels(features)
         else:
-            prediction_frame=features[["moviename","genre_toplist"]]
+            prediction_frame=features[["moviename","genre_toplist","actors"]]
        
         
         
@@ -300,7 +300,21 @@ class MovieTrainer(object):
         
         return gross_arr
         
+    def _get_top_actors(self,actorlist):
+        top_actors=[None,None,None]
+        if type(actorlist) ==float:
+            return top_actors;
         
+        counter=0
+        for actor in actorlist:
+            top_actors[counter]=self._modify_string(actor)
+            counter+=1
+            if counter==2:
+                break
+        return top_actors
+                
+                
+             
         
     def explore_data(self):
         """
@@ -389,18 +403,22 @@ class MovieTrainer(object):
         cursor.execute('CREATE TABLE currentmovies(\
                                      moviename VARCHAR(255) ,\
                                      genre VARCHAR(255),\
-                                     prediction INT)')
+                                     prediction INT,\
+                                     actor1 VARCHAR(255),\
+                                     actor2 VARCHAR(255),\
+                                     actor3 VARCHAR(255))')
         
         for index in self._prediction_frame.index:
             movname=self._prediction_frame.ix[index]["moviename"].encode('utf-8')
             pred=self._prediction_frame.ix[index]["prediction"]
             genre=self._prediction_frame.ix[index]["genre_toplist"].encode('utf-8')
+            (actor1,actor2,actor3)=self._get_top_actors(self._prediction_frame.ix[index]["actors"])
             if type(movname)==float and math.isnan(movname)==True:
                 continue
             print movname,genre,pred
             
             cursor.execute('INSERT INTO currentmovies\
-                             VALUES(?,?,?)',(movname,genre,pred))
+                             VALUES(?,?,?,?,?,?)',(movname,genre,pred,actor1,actor2,actor3))
         
         con.commit()
         con.close()

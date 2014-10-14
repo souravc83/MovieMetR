@@ -1,51 +1,10 @@
-{% extends "layout.html" %}
-{% block content %}
+{% extends "top_panel.html" %}
+{% block mainpage %}
 
-<div class="container">
-	
-<div class="row">
-    <div class="col-md-4">
 
-        <!-- Genre Selection -->
-        <div class="dropdown">
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                    Choose your Genre <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu" role="menu">
-                    <li><a href="/index.html">All</a></li>
-                    <li><a href="/docu.html">Documentary</a></li>
-                    <li><a href="/foreign.html">Foreign</a></li>
-                    <li><a href="/drama.html">Drama</a></li>
-                    <li><a href="/comedy.html">Comedy</a></li>
-                    <li><a href="/thriller.html">Thriller</a></li>
-                    
-                </ul>
-        </div>
-    </div>
-    
-    
-    <div class="col-md-4">
-        
-        <!-- Search a movie -->
-        <!--<form class="navbar-form navbar-left" role="form" method="POST"> -->
-            <div class="input-group">
-                <input type="text" class="form-control" placeholder="Search a movie">
-                    <span class="input-group-btn">
-                        <button class="btn btn-default" type="button">Go!</button>
-                    </span>
-            </div><!-- /input-group -->
-       <!-- </form>-->
-    </div><!-- /.col-md-8-->
-    
-
-    
-    
-    
-</div><!--row -->
 
 <!--how to do this properly? -->
-<p>     </p>
-<p>     </p>
+ <br><br><br><br>
 
 
 
@@ -55,10 +14,10 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Number</th>
+                    <th> </th>
                     <th>Movie</th>
-                    <th>Thumbnail</th>
-                    <th>Rating</th>
+                    <th> </th>
+                    <th>Actors</th>
                     <th>Hotness</th>
                     
                 </tr>
@@ -66,14 +25,15 @@
             <tbody>
                 {% for entry in movielist %}
                 <tr>
-                    <td class="col-md-1">{{entry[0]}}</td>
-                    <td class="col-md-3">{{entry[1]}}</td>
-                    <td class="col-md-2"><img src={{entry[2]}} alt="Movie Thumbnail" style="width:61px;height:91px"></td>
-                    <td class="col-md-1">{{entry[3]}}</td>
-                    <td class="col-md-4">
+                    <td class="col-md-1">{{entry["index"]}}</td>
+                    <td class="col-md-3"><a href={{entry.movlink}}>{{entry["name"]}}</a?</td>
+                    <td class="col-md-2"><img src={{entry["thumbnail"]}} alt="Movie Thumbnail" style="width:61px;height:91px"></td>
+                    <td class="col-md-2"> {{entry.actors[0]}}<br>{{entry.actors[1]}}<br>{{entry.actors[2]}} </td>
+                    <td class="col-md-3">
+                        
                         <div class="progress">
-                            <div class="progress-bar progress-bar-danger progress-bar-striped" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: {{entry[4]}}%">
-                                <span class="sr-only">80% Complete (danger)</span>
+                            <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="{{entry["prediction"]}}" aria-valuemin="0" aria-valuemax="100" style="width: {{entry["prediction"]}}%; min-width:20px;">
+                                <span> {{entry["prediction"]}}</span>
                             </div>
                         </div>
                     </td>
@@ -87,5 +47,6 @@
     
 </div>
 
-</div>
+
+
 {% endblock %}

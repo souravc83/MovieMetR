@@ -42,15 +42,17 @@ class RottenTomato(object):
                 moviename=movie["title"]
                 thumbnail=movie["posters"]["thumbnail"]
                 audience_score=movie["ratings"]["audience_score"]
+                detailed_img=movie["posters"]["original"]
+                mov_link=movie["links"]["alternate"]
                 if movieid in movieid_dict:
                     break
                 else:
                     movieid_dict[movieid]=True
                     
-                print moviename,":",thumbnail,":",audience_score
+                print moviename,":",thumbnail,":",audience_score,":",mov_link
                 self._cursor.execute('INSERT INTO rottentomatoes\
-                                      VALUES(?,?,?,?)'\
-                                      ,(movieid,moviename,thumbnail,audience_score))
+                                      VALUES(?,?,?,?,?,?)'\
+                                      ,(movieid,moviename,thumbnail,audience_score,detailed_img,mov_link))
         return
     
     def _init_database(self):
@@ -61,7 +63,9 @@ class RottenTomato(object):
                                            movieid INT PRIMARY KEY NOT NULL,\
                                            moviename VARCHAR(255) NOT NULL,\
                                            thumbnail VARCHAR(255),\
-                                           score INT)')
+                                           score INT,\
+                                           detailed VARCHAR(255),\
+                                           movlink VARCHAR(255))')
         return
     
     def read_currentmovies(self):

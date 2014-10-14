@@ -1,0 +1,201 @@
+
+{% extends "layout.html" %}
+{% block content %}
+
+
+<style type="text/css">
+    
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: black;
+        shape-rendering: crispEdges;
+    }
+
+.axis text {
+    font-family: sans-serif;
+    font-size: 11px;
+}
+
+.axis_label text {
+    font-family: sans-serif;
+    font-size: 18px;
+    
+}
+
+</style>
+
+<div class="row">
+    <div class="col-md-4">
+        
+  
+    </div>
+    
+    
+    <div class="col-md-4">
+        <!-- Search a movie -->
+        <form method="POST" action="."  role="search">
+            <div class="input-group">
+                <input type="text" class="form-control" name="address" placeholder="Search a Movie">
+                    <span class="input-group-btn">
+                        <button type="submit" class="btn btn-default">Go!</button>
+                    </span>
+                    </div><!-- /input-group -->
+        </form>
+    </div><!-- /.col-md-8-->
+    
+    <div class="col-md-4">
+        <ul class="nav nav-pills col-md-offset-6">
+            <li class="active"><a href="/index.html">Back to List</a></li>
+        </ul>
+        
+    </div>
+    
+    
+    
+    
+    
+</div><!--row -->
+
+    <div style="text-align:center;width:1000px;height:600px;" class="graph_container">
+        <script type="text/javascript">
+            var width=500;
+            var height=520;
+            
+            var padding=40;
+            var colors= d3.scale.category20()
+            
+            
+            
+           // var dataset=[{"x":5,"y":10,"name":"one"},
+            //             {"x":10,"y":20,"name":"two"},
+           //              {"x":15,"y":30,"name":"three"},
+           //              {"x":20,"y":40,"name":"four"}
+           //             ];
+           
+           var dataset={{ json_data|tojson }};
+           
+           
+           var maxpred=0;
+           var minpred=100;
+           var max_audience_score=0;
+           var min_audience_score=100;
+           
+           for (i=0;i<dataset.length;i++)
+           {
+               if(maxpred<dataset[i].prediction)
+               {
+                   maxpred=dataset[i].prediction;
+               }
+               if(minpred>dataset[i].prediction)
+               {
+                   minpred=dataset[i].prediction;
+               }
+                if(max_audience_score<dataset[i].audience_score)
+                {
+                    max_audience_score=dataset[i].audience_score;
+                }
+                if(min_audience_score>dataset[i].audience_score)
+                {
+                    min_audience_score=dataset[i].audience_score;
+                }
+           }
+        
+        var pred_range=maxpred-minpred;
+        var audience_score_range=max_audience_score-min_audience_score;
+        
+        var xmin=min_audience_score-0.1*audience_score_range;
+        var xmax=max_audience_score+0.1*audience_score_range;
+        var ymin=minpred-0.05*pred_range;
+        var ymax=maxpred+0.05*pred_range;
+           
+           
+           var xscale=d3.scale.linear()
+           .domain([xmin,xmax])
+           .range([padding ,width-padding])
+           var yscale=d3.scale.linear()
+           .domain([ymin,ymax])
+           .range([height-padding ,padding])
+           
+
+
+            var svg=d3.select(".graph_container")
+                      .append("svg")
+                      .attr("width",width)
+                      .attr("height",height)
+                      .attr("class","center");
+                svg.selectAll("circle")
+                   .data(dataset)
+                   .enter()
+                   .append("circle")
+                   .attr("cx",function(d,index){return xscale(d.audience_score)})
+                   .attr("cy",function(d,index){return yscale(d.prediction)})
+                   .attr("r",function(d,index){return d.prediction})
+                   .attr("fill",function (d){return colors(d.prediction-1)})
+                   .attr("fill-opacity",0.3)
+                   .text(function (d){return d.audience_score});
+                   
+            var xAxis = d3.svg.axis()
+                              .scale(xscale)
+                              .orient("bottom")
+                              .ticks(5);
+                              
+            var yAxis = d3.svg.axis()
+                              .scale(yscale)
+                              .orient("left")
+                              .ticks(5);
+            
+            
+                svg.append("g")
+                    .attr("class","axis")
+                    .attr("transform", "translate(10," + (height - padding) + ")")
+                    .call(xAxis);
+                
+                svg.append("g")
+                .attr("class","axis")
+                .attr("transform", "translate(" + (padding) + ",0)")
+                .call(yAxis);
+                
+                
+                svg.append("text")
+                .attr("class", "axis_label")
+                .attr("text-anchor", "middle")
+                .attr("font-family","Arial")
+                .attr("font-size",16)
+                .attr("fill","#B8B8B8")
+                .attr("x", (width)/2)
+                .attr("y", height - padding + 40)
+                .text("What RottenTomato members think")
+                
+                svg.append("text")
+                .attr("font-family","Arial")
+                .attr("font-size",16)
+                .attr("fill","#B8B8B8")
+                .attr("class", "axis_label")
+                .attr("text-anchor", "middle")
+                .attr("x", -height/2)
+                .attr("y", 10)
+                .attr("transform", "rotate(-90)")
+                .text(" What the Data thinks ")
+                
+                
+                    
+                    $('svg circle').tipsy({
+                                            gravity: 'w',
+                                            html: true,
+                                            title: function()
+                                            {
+                                          return this.__data__.name;
+                                            }
+                                          }
+                                        );
+
+            
+
+            
+        </script>
+    </div>
+        
+
+
+{% endblock %}
