@@ -7,8 +7,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import re
 from sklearn.linear_model import LinearRegression
-import sklearn.linear_model as linear_model
+#import sklearn.linear_model as linear_model
 from sklearn.cross_validation import train_test_split
+from sklearn.cross_validation import KFold, cross_val_score
+from sklearn.linear_model import LassoCV
+
 import sqlite3
 import math
 #local imports
@@ -358,19 +361,24 @@ class MovieTrainer(object):
         self._load_dataframe()
         total_features,total_labels=self._extract_features(self._training_frame,isTraining=True)
         #create train and test split
-        self._features, test_features, self._labels, test_labels =\
-            train_test_split(total_features, total_labels, test_size = 0.1)
-            
-        #self._clf=LinearRegression()
-        self._clf = linear_model.Lasso(alpha=0.1)
-        self._clf.fit(self._features,self._labels)
+        #self._features, test_features, self._labels, test_labels =\
+        #    train_test_split(total_features, total_labels, test_size = 0.1)
+        
+        print total_features.shape
+        print total_labels.shape
+        
+        self._clf=LassoCV(eps=0.01, n_alphas=10,cv =3)
+        #self._clf.fit(self._features,self._labels)
+        cv_outer = KFold(total_labels.shape[0],n_folds=3)
+        self._clf = LassoCV(eps=0.01, n_alphas=10,cv =3)
+        cross_val_arr=cross_val_score(self._clf,total_features,total_labels,cv=cv_outer)
         print "Finished Training....."
         
-        r_sq=self._clf.score(test_features, test_labels)
+        r_sq=np.mean(cross_val_arr)
         print "R Square for training set: ",r_sq
         
-        plt.plot(test_labels, self._clf.predict(test_features),'ro',linewidth=2)
-        plt.show()
+        #plt.plot(test_labels, self._clf.predict(test_features),'ro',linewidth=2)
+        #plt.show()
         
     
     def test_2014(self):

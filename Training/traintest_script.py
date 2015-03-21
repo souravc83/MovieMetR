@@ -1,7 +1,7 @@
 #global imports
 
 #local imports
-from movietrainer import MovieTrainer
+from movietrainer2 import MovieTrainer
 
 def traintest():
     trainer=MovieTrainer('dictlist_movies_2013.pickle','dictlist_movies_2014.pickle')
@@ -9,8 +9,8 @@ def traintest():
     
     #trainer.top_5_genres()
     trainer.train_2013()
-    trainer.test_2014()
-    trainer.save_db('current_movies.db')
+    #trainer.test_2014()
+    #trainer.save_db('current_movies.db')
 
 if __name__=="__main__":
     traintest()
