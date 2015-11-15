@@ -1,0 +1,51 @@
+What maketh a hit movie?
+========================================================
+I have movie data from 2014, mainly metadata. Questions this document will answer are:
+* What is the distribution of incomes of the top earning actors?
+* same income distribution for the directors?
+* Which month releases did the best?
+* Which movie genres make the most money?
+* Do people like to watch long movies?
+
+First, we will load our dataframes. 
+We have two frames, one is the raw frame we got from scraping and joining data 
+from boxofficemojo and rottentomatoes.
+Second is the training data we created by cleaning the data in python.
+```{r}
+raw_frame = read.csv("raw_frame.csv", header=T,stringsAsFactors=F)
+print("Columns in raw frame are:")
+print(names(raw_frame))
+
+clean_frame = read.csv("training_frame.csv", header=T, stringsAsFactors=F)
+print("Columns in cleaned frame are:")
+print(names(clean_frame))
+```
+Our first task would be to find how much has each of the top actors made?
+There is some sleight of hand involved, since we saved these in the raw frame
+as a python list which R does not quite recognize
+```{r, echo=FALSE}
+get_actor_vector = function(x)
+{
+  if(x=="")
+    return( c())
+  char_list = strsplit(x,',')[1]
+  actor_names = c()
+  for(char in char_list)
+  {
+    #remove special characters,leading, trailing spaces
+    val = gsub('\\[|\\]|\\*|^\\s+|\\s+$|\'','',char)
+    #replace spaces with _
+    val = gsub('\\s+','_',val)
+    actor_names = c(actor_names, val)
+  }
+  return(actor_names)
+}
+
+```
+
+You can also embed plots, for example:
+
+```{r fig.width=7, fig.height=6}
+plot(cars)
+```
+
