@@ -63,30 +63,39 @@ class MovieTrainer(object):
         return
             #raise error?
     
-    def _addtodict(self,name,dict):
-        if name in dict:
-            dict[name]+=1
+    def _addtodict(self,name,this_dict):
+        if this_dict.has_key(name):
+            this_dict[name]+=1
         else:
-            dict[name]=1
+            this_dict[name]=1
         return
         
     def _modify_string(self,playername):
-        playername=re.sub('\s','_',playername)
+        playername = re.sub('^\s+|\s+$','', playername)
+        playername=re.sub('\s+','_',playername)
         playername=re.sub('\*','',playername)
         return playername
     
+    #this function creates a list of features
+    #corresponding to the most frequent actors 
+    #in a movie
     def _create_playerdict(self,frame,colname,num_features):
         
         playerdict={}
         
         
         for index in frame.index:
-            playerlist=frame.ix[index,colname]
+            #for each row, we have list of actors
+            #like ['Sandra Bullock', 'Melissa McCarthy']
+            playerlist=frame.ix[index,colname] 
             
             
             if type(playerlist)!=float:
+                #only actors have multiple list members, other players
+                #like director don't
                 if colname=="actors":
                     for playername in playerlist:
+                        #remove spaces, *, leading trailing spaces
                         playername=self._modify_string(playername)
                         self._addtodict(playername,playerdict)
 
@@ -98,6 +107,7 @@ class MovieTrainer(object):
         
         counter=0
         feature_list=[]
+        #sort the dict to get players with highest number of movies
         for key,value in sorted(playerdict.items(),key=lambda x:x[1],reverse=True):
             #print key,value
             feature_list.append(key)
@@ -106,14 +116,19 @@ class MovieTrainer(object):
                 break
         return feature_list
     
+    #this function returns a value of the player features for 
+    #each movie
+    
     def _create_player_features(self,frame,colname,num_features):
+        #feature_list is all names of players with most movies
         feature_list=self._create_playerdict(frame,colname,num_features)
+        actor_frame = pd.DataFrame()
         
         for player in feature_list:
             feature_name=colname+":"+player
-            frame[feature_name]=pd.Series(0,index=frame.index)
-            bigplayer_name="feature:big_"+colname
-            frame[bigplayer_name]=pd.Series(0,index=frame.index)#big actors directors present or not?
+            actor_frame[feature_name]=pd.Series(0,index=frame.index)
+            bigplayer_name="feature:big_"+colname #TODO: take out of loop
+            actor_frame[bigplayer_name]=pd.Series(0,index=frame.index)#big actors directors present or not?
             
         for index in frame.index:
             playerval=frame.ix[index,colname]
@@ -123,24 +138,25 @@ class MovieTrainer(object):
                         actor=self._modify_string(actor)
                         if actor in feature_list:
                             thisfeature=colname+":"+actor
-                            frame.loc[index,thisfeature]=1
+                            actor_frame.loc[index,thisfeature]=1
                 else:
                     playerval=self._modify_string(playerval)
                     if playerval in feature_list:
                         thisfeature=colname+":"+playerval
-                        frame.loc[index,thisfeature]=1
-                frame.loc[index,bigplayer_name]=1
+                        actor_frame.loc[index,thisfeature]=1
+                actor_frame.loc[index,bigplayer_name]=1
             else:
-                frame.loc[index,bigplayer_name]=0
+                actor_frame.loc[index,bigplayer_name]=0
                         
-        return 
+        return actor_frame
                         
                 
         
     def _create_theater_features(self,frame):
         
         #add feature column
-        frame["feature:num_theaters"]=pd.Series(0,index=frame.index)
+        theater_frame=pd.DataFrame()
+        theater_frame["feature:num_theaters"]=pd.Series(0,index=frame.index)
         
         
         for index in frame.index:
@@ -149,33 +165,35 @@ class MovieTrainer(object):
                 theater=theater_list[0]
                 theater=re.sub(',','',theater)
                 if re.search('\d+',theater) is not None:
-                    frame.loc[index,"feature:num_theaters"]=int(theater)
+                    theater_frame.loc[index,"feature:num_theaters"]=int(theater)
                 else:
-                    frame.loc[index,"feature:num_theaters"]=0
+                    theater_frame.loc[index,"feature:num_theaters"]=0
             else:
-                frame.loc[index,"feature:num_theaters"]=0
+                theater_frame.loc[index,"feature:num_theaters"]=0
         
-        return
+        return theater_frame
         
     def _first_weekend_rank(self,frame):
         #todo: try to merge with create theater features
-        frame["feature:rank"]=pd.Series(0,index=frame.index)
+        weekend_frame = pd.DataFrame()
+        weekend_frame["feature:rank"]=pd.Series(0,index=frame.index)
         for index in frame.index:
             rank_list=frame.ix[index,"rank_list"]
             if type(rank_list)==list and len(rank_list)>0:
                 rank=rank_list[0]
                 rank=re.sub(',','',rank)
                 if re.search('\d+',rank) is not None:
-                    frame.loc[index,"feature:rank"]=int(rank)
+                    weekend_frame.loc[index,"feature:rank"]=int(rank)
                 else:
-                    frame.loc[index,"feature:rank"]=1000#some large number? or zero?
+                    weekend_frame.loc[index,"feature:rank"]=1000#some large number? or zero?
             else:
-                frame.loc[index,"feature:rank"]=1000
+                weekend_frame.loc[index,"feature:rank"]=1000
         
-        return
+        return weekend_frame
     
     def _create_running_time_feature(self,frame):
-        frame["feature:runtime"]=pd.Series(0,index=frame.index)
+        runtime_frame = pd.DataFrame()
+        runtime_frame["feature:runtime"]=pd.Series(0,index=frame.index)
         
         for index in frame.index:
             running_time=frame.ix[index,"runtime"]
@@ -186,24 +204,24 @@ class MovieTrainer(object):
                     hrs=hrmin.group(1)
                     mins=hrmin.group(2)
                     tot_time=int(hrs)*60+int(mins)
-                    frame.loc[index,"feature:runtime"]=tot_time
+                    runtime_frame.loc[index,"feature:runtime"]=tot_time
                     
                 else:
-                    frame.loc[index,"feature:runtime"]=0
+                    runtime_frame.loc[index,"feature:runtime"]=0
                     
             else:
-                frame.loc[index,"feature:runtime"]=0
+                runtime_frame.loc[index,"feature:runtime"]=0
             
-        return
+        return runtime_frame
                 
     
     def _create_release_date_feature(self,frame):
         monthlist=["January","February","March","April","May","June"\
                 "July","August","September","October","November","December"]
-        
+        month_frame = pd.DataFrame()
         for month in monthlist:
             feature_name="feature:release_"+month
-            frame[feature_name]=pd.Series(0,index=frame.index) 
+            month_frame[feature_name]=pd.Series(0,index=frame.index) 
         
         for index in frame.index:
             release_date=frame.ix[index,"release_date"]
@@ -216,8 +234,8 @@ class MovieTrainer(object):
                     
                     if month in monthlist:
                         thisfeature="feature:release_"+month
-                        frame.loc[index,thisfeature]=1
-        return
+                        month_frame.loc[index,thisfeature]=1
+        return month_frame
                         
                        
     
@@ -227,55 +245,63 @@ class MovieTrainer(object):
         all major data munging, cleaning takes place here
         
         """ 
-        pass
-        #we will make features as the training frame, add feature columns
-        #and then remove original columns
-        #then we don't have to worry about which movies we dropped
-        
-         
-        cols_to_remove=(frame.columns).tolist()
-        
+        #pass
+        #we will make clean_frame as the data frame, 
+        #then we will define the training/test frame
+        #and add each feature as a dataframe
+        #and finally concatenate the features
+    
+                
         #check if labels exist for these movies 
-        features=frame[pd.notnull(frame["domestic_gross"])]
+        clean_data=frame[pd.notnull(frame["domestic_gross"])]
+        
+        list_of_frames=[]
         
         #no of theaters it opened at in the first week
         #keep this as first feature so that you can plot using this
-        self._create_theater_features(features)
+        list_of_frames.append( self._create_theater_features(clean_data) )
         print "Created Theater Feature..."
-        #self._first_weekend_rank(features)
+        list_of_frames.append( self._first_weekend_rank(clean_data) )
         print "Created Rank Feature..."
-        #self._create_running_time_feature(features)
+        list_of_frames.append( self._create_running_time_feature(clean_data) )
         print "Created running time Feature..."
-        self._create_release_date_feature(features)
+        list_of_frames.append( self._create_release_date_feature(clean_data) )
         print "Created release date Feature..."
         #create player features
-        self._create_player_features(features,"actors",20)
-        #self._create_player_features(features,"director",20)
-        #self._create_player_features(features,"distributor",20)
-        #self._create_player_features(features,"genre_toplist",5)
-        #self._create_player_features(features,"mpaa_rating",5)
+        list_of_frames.append( \
+                    self._create_player_features(clean_data,"actors",5) )
+        list_of_frames.append( \
+                    self._create_player_features(clean_data,"director",5) )
+        list_of_frames.append( 
+                    self._create_player_features(clean_data,"distributor",5) )
+        list_of_frames.append( 
+                    self._create_player_features(clean_data,"genre_toplist",5) )
+        list_of_frames.append( 
+                    self._create_player_features(clean_data,"mpaa_rating",5) )
         print "Created player Features..."
         
+        #check dataframe shapes
+        for frames in list_of_frames:
+            assert frames.shape[0] == clean_data.shape[0]
+            
         
-    
-
+        #concatenate the dataframes
+        final_frame = pd.concat(list_of_frames,axis = 1)
         
+        final_frame.to_csv("Training/training_frame.csv")
         
         #get training labels
         if isTraining == True:
-            labels_arr=self._extract_labels(features)
+            labels_arr=self._extract_labels(clean_data)
         else:
-            prediction_frame=features[["moviename","genre_toplist","actors"]]
+            prediction_frame=clean_data[["moviename","genre_toplist","actors"]]
        
+
+        n_samples=len(final_frame.index)
+        n_features=len(final_frame.columns)
         
-        
-        
-        #remove all original cols
-        features.drop(cols_to_remove,axis=1,inplace=True)
-        n_samples=len(features.index)
-        n_features=len(features.columns)
-        
-        feature_arr=features.values.reshape(n_samples,n_features)
+        #from Dataframe to numpy array
+        feature_arr=final_frame.values.reshape(n_samples,n_features)
         
         print "Created All Features....."
         
@@ -359,26 +385,41 @@ class MovieTrainer(object):
     def train_2013(self):
         #pass
         self._load_dataframe()
+        self._training_frame.to_csv("Training/raw_frame.csv")
         total_features,total_labels=self._extract_features(self._training_frame,isTraining=True)
+        total_labels=np.ravel(total_labels)
+        
+        print type(total_features)
+        print type(total_labels)
+
+                                       
+        
+        
         #create train and test split
-        #self._features, test_features, self._labels, test_labels =\
-        #    train_test_split(total_features, total_labels, test_size = 0.1)
+        self._features, test_features, self._labels, test_labels =\
+            train_test_split(total_features, total_labels, test_size = 0.33)
         
-        print total_features.shape
-        print total_labels.shape
         
-        self._clf=LassoCV(eps=0.01, n_alphas=10,cv =3)
-        #self._clf.fit(self._features,self._labels)
-        cv_outer = KFold(total_labels.shape[0],n_folds=3)
-        self._clf = LassoCV(eps=0.01, n_alphas=10,cv =3)
-        cross_val_arr=cross_val_score(self._clf,total_features,total_labels,cv=cv_outer)
+        
+        print self._features.shape
+        print self._labels.shape
+        print test_features.shape
+        print test_labels.shape
+        
+        cv_outer = KFold(self._labels.shape[0],n_folds=5)
+        self._clf = LassoCV(eps=0.01, n_alphas=10,cv =5)
+        cross_val_arr=cross_val_score(self._clf,self._features,self._labels,cv=cv_outer)
         print "Finished Training....."
         
         r_sq=np.mean(cross_val_arr)
         print "R Square for training set: ",r_sq
         
-        #plt.plot(test_labels, self._clf.predict(test_features),'ro',linewidth=2)
-        #plt.show()
+        self._clf.fit(self._features,self._labels)
+        plt.plot(test_labels, self._clf.predict(test_features),'ro',linewidth=2)
+        plt.plot(np.arange(0,1.,.1),np.arange(0,1.,.1),'b-',linewidth=2)
+        plt.xlabel("Actual Gross")
+        plt.ylabel("Predicted Gross")
+        plt.show()
         
     
     def test_2014(self):
